@@ -1,0 +1,47 @@
+services:
+  yacht:
+    image: selfhostedpro/yacht
+    networks:
+      web:
+        ipv4_address: 10.0.9.8
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - "DISABLE_AUTH=True"
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=web"
+        - "traefik.http.routers.yacht.rule=Host(`yacht.test.wilsoncastro.dev`)"
+        - "traefik.http.routers.yacht.entrypoints=https"
+        - "traefik.http.routers.yacht.tls=true"
+        - "traefik.http.routers.yacht.tls.certresolver=letsencrypt"
+        - "traefik.http.services.yacht.loadbalancer.server.port=8000"
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+networks:
+  web:
+    external: true
+
+# Implanta uma stack do serviço "Yacht" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.yacht.test.yml yacht
+
+# Implanta uma stack do serviço "Yacht" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.yacht.production.yml yacht
+
+# Lista serviços Docker em execução
+# sudo docker service ls
+
+# Lista detalhes específicos do serviço "Yacht"
+# sudo docker service ps yacht_yacht
+
+# Exibe os logs do serviço "Yacht"
+# sudo docker service logs yacht_yacht
+
+# Remove o serviço "Yacht" do ambiente de teste
+# sudo docker stack rm yacht

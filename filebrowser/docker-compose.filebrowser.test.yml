@@ -1,0 +1,51 @@
+services:
+  filebrowser:
+    image: filebrowser/filebrowser
+    environment:
+      - TZ=America/Sao_Paulo
+      - FB_AUTH_USER=admin
+      - FB_AUTH_PASS=admin
+      - FB_NOAUTH=true
+    volumes:
+      - /home/ubuntu:/srv
+      - ./filebrowser-app/filebrowser.db:/database.db
+    networks:
+      web:
+        ipv4_address: 10.0.9.16
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=web"
+        - "traefik.http.routers.filebrowser.rule=Host(`filebrowser.test.wilsoncastro.dev`)"
+        - "traefik.http.routers.filebrowser.entrypoints=https"
+        - "traefik.http.routers.filebrowser.tls=true"
+        - "traefik.http.routers.filebrowser.tls.certresolver=letsencrypt"
+        - "traefik.http.services.filebrowser.loadbalancer.server.port=80"
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+networks:
+  web:
+    external: true
+
+# Implanta uma stack do serviço "Filebrowser" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.filebrowser.test.yml filebrowser
+
+# Implanta uma stack do serviço "Filebrowser" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.filebrowser.production.yml filebrowser
+
+# Lista serviços Docker em execução
+# sudo docker service ls
+
+# Lista detalhes específicos do serviço "Filebrowser"
+# sudo docker service ps filebrowser_filebrowser
+
+# Exibe os logs do serviço "Filebrowser"
+# sudo docker service logs filebrowser_filebrowser
+
+# Remove o serviço "Filebrowser" do ambiente de teste
+# sudo docker stack rm filebrowser_filebrowser

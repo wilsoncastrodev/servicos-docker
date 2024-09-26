@@ -1,0 +1,48 @@
+services:
+  ntfy:
+    image: binwiederhier/ntfy
+    environment:
+      - TZ=America/Sao_Paulo
+    volumes:
+      - ./ntfy-app/cache:/var/cache/ntfy
+      - ./ntfy-app/etc:/etc/ntfy
+    networks:
+      web:
+        ipv4_address: 10.0.9.30
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=web"
+        - "traefik.http.routers.ntfy.rule=Host(`ntfy.test.wilsoncastro.dev`)"
+        - "traefik.http.routers.ntfy.entrypoints=https"
+        - "traefik.http.routers.ntfy.tls=true"
+        - "traefik.http.routers.ntfy.tls.certresolver=letsencrypt"
+        - "traefik.http.services.ntfy.loadbalancer.server.port=80"
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+networks:
+  web:
+    external: true
+
+# Implanta uma stack do serviço "NTFY" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.ntfy.test.yml ntfy
+
+# Implanta uma stack do serviço "NTFY" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.ntfy.production.yml ntfy
+
+# Lista serviços Docker em execução
+# sudo docker service ls
+
+# Lista detalhes específicos do serviço "NTFY"
+# sudo docker service ps ntfy_ntfy
+
+# Exibe os logs do serviço "NTFY"
+# sudo docker service logs ntfy_ntfy
+
+# Remove o serviço "NTFY" do ambiente de teste
+# sudo docker stack rm ntfy

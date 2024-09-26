@@ -1,0 +1,79 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      - POSTGRES_USER=wilsoncastrodev
+      - POSTGRES_PASSWORD=GBE3GlW2cCwFmQs3
+      - POSTGRES_DB=keycloak
+    volumes:
+      - ./postgres-app/data:/var/lib/postgresql/data
+    networks:
+      web:
+        ipv4_address: 10.0.9.25
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+  keycloak:
+    image: quay.io/keycloak/keycloak
+    environment:
+      - TZ=America/Sao_Paulo
+      - KC_DB=postgres
+      - KC_DB_URL_HOST=postgres
+      - KC_DB_URL_DATABASE=keycloak
+      # - KC_DB_URL=jdbc:postgresql://postgres:5432/keycloak
+      - KC_DB_USERNAME=wilsoncastrodev
+      - KC_DB_PASSWORD=GBE3GlW2cCwFmQs3 # pwgen -N 1 -s 16
+      - KC_PROXY=edge
+      - KEYCLOAK_ADMIN=wilsoncastrodev
+      - KEYCLOAK_ADMIN_PASSWORD=QZrHXbMUs10mlL2n # pwgen -N 1 -s 16
+    volumes:
+      - ./keycloak-app/realms:/opt/keycloak/data/import
+      - ./keycloak-app/themes:/opt/keycloak/themes
+    command: start --spi-connections-http-client-default-disable-trust-manager=false --import-realm --hostname-strict=false
+    depends_on:
+      - postgres
+    networks:
+      web:
+        ipv4_address: 10.0.9.26
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=web"
+        - "traefik.http.routers.keycloak.rule=Host(`keycloak.test.wilsoncastro.dev`) || Host(`login.wilsoncastro.dev`)"
+        - "traefik.http.routers.keycloak.entrypoints=https"
+        - "traefik.http.routers.keycloak.tls=true"
+        - "traefik.http.routers.keycloak.tls.certresolver=letsencrypt"
+        - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+networks:
+  web:
+    external: true
+
+# Implanta uma stack do serviço "Keycloak" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.keycloak.test.yml keycloak
+
+# Implaocnta uma stack do serviço "Keycloak" no ambiente de teste
+# sudo dker stack deploy -c docker-compose.keycloak.production.yml keycloak
+
+# Lista serviços Docker em execução
+# sudo docker service ls
+
+# Lista detalhes específicos do serviço "Keycloak"
+# sudo docker service ps keycloak_keycloak
+
+# Exibe os logs do serviço "Keycloak"
+# sudo docker service logs keycloak_keycloak
+
+# Remove o serviço "Keycloak" do ambiente de teste
+# sudo docker stack rm keycloak

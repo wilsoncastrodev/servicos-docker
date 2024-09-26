@@ -1,0 +1,88 @@
+services:
+  loki:
+    image: grafana/loki
+    environment:
+      - TZ=America/Sao_Paulo
+    command:
+      - --config.file=/etc/loki/local-config.yml
+    volumes:
+      - ./grafana-app/loki/config/local-config.yml:/etc/loki/local-config.yml
+      - ./grafana-app/loki:/etc/loki
+    networks:
+      web:
+        ipv4_address: 10.0.9.19
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+  promtail:
+    image: grafana/promtail
+    environment:
+      - TZ=America/Sao_Paulo
+    command: -config.file=/etc/promtail/config.yml
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/containers:/var/lib/docker/containers
+      - ./grafana-app/promtail/config.yml:/etc/promtail/config.yml
+    networks:
+      web:
+        ipv4_address: 10.0.9.20
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+        delay: 10s
+  
+  grafana:
+    image: grafana/grafana
+    volumes:
+      - ./grafana-app/grafana:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - TZ=America/Sao_Paulo
+    networks:
+      web:
+        ipv4_address: 10.0.9.21
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=web"
+        - "traefik.http.routers.grafana.rule=Host(`grafana.test.wilsoncastro.dev`)"
+        - "traefik.http.routers.grafana.entrypoints=https"
+        - "traefik.http.routers.grafana.tls=true"
+        - "traefik.http.routers.grafana.tls.certresolver=letsencrypt"
+        - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+networks:
+  web:
+    external: true
+
+# Implanta uma stack do serviço "Grafana" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.grafana.test.yml grafana
+
+# Implanta uma stack do serviço "Grafana" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.grafana.production.yml grafana
+
+# Lista serviços Docker em execução
+# sudo docker service ls
+
+# Lista detalhes específicos do serviço "Grafana"
+# sudo docker service ps grafana_grafana
+
+# Exibe os logs do serviço "Grafana"
+# sudo docker service logs grafana_grafana
+
+# Remove o serviço "Grafana" do ambiente de teste
+# sudo docker stack rm grafana

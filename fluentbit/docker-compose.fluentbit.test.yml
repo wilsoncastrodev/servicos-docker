@@ -1,0 +1,49 @@
+services:
+  fluentbit:
+    image: fluent/fluent-bit
+    environment:
+      - TZ=America/Sao_Paulo
+    volumes:
+      - ./fluent-bit-app/config/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
+      - ./fluent-bit-app/config/parsers.conf:/fluent-bit/etc/parsers.conf
+      - /var/lib/docker/containers:/var/lib/docker/containers
+    networks:
+      web:
+        ipv4_address: 10.0.9.40
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=web"
+        - "traefik.http.routers.fluentbit.rule=Host(`fluentbit.test.wilsoncastro.dev`)"
+        - "traefik.http.routers.fluentbit.entrypoints=https"
+        - "traefik.http.routers.fluentbit.tls=true"
+        - "traefik.http.routers.fluentbit.tls.certresolver=letsencrypt"
+        - "traefik.http.services.fluentbit.loadbalancer.server.port=8080"
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+networks:
+  web:
+    external: true
+
+# Implanta uma stack do serviço "Fluentbit" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.fluentbit.test.yml fluentbit
+
+# Implanta uma stack do serviço "Fluentbit" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.fluentbit.production.yml fluentbit
+
+# Lista serviços Docker em execução
+# sudo docker service ls
+
+# Lista detalhes específicos do serviço "Fluentbit"
+# sudo docker service ps fluentbit_fluentbit
+
+# Exibe os logs do serviço "Fluentbit"
+# sudo docker service logs fluentbit_fluentbit
+
+# Remove o serviço "Fluentbit" do ambiente de teste
+# sudo docker stack rm fluentbit

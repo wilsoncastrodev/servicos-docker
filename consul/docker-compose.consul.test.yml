@@ -1,0 +1,52 @@
+services:
+  consul:
+    image: hashicorp/consul:latest
+    container_name: consul
+    ports:
+      - "8500:8500"
+    environment:
+      - CONSUL_BIND_INTERFACE=eth0
+    volumes:
+      - ./consul-app/config:/consul/config
+      - ./consul-app/data:/consul/data
+    command: "agent -server -ui -bootstrap-expect=1 -client=0.0.0.0"
+#     networks:
+#       web:
+#         ipv4_address: 10.0.9.54
+#     deploy:
+#       labels:
+#         - "traefik.enable=true"
+#         - "traefik.docker.network=web"
+#         - "traefik.http.routers.consul.rule=Host(`consul.test.wilsoncastro.dev`)"
+#         - "traefik.http.routers.consul.entrypoints=https"
+#         - "traefik.http.routers.consul.tls=true"
+#         - "traefik.http.routers.consul.tls.certresolver=letsencrypt"
+#         - "traefik.http.services.consul.loadbalancer.server.port=8080"
+#       replicas: 1
+#       restart_policy:
+#         condition: any
+#       update_config:
+#         parallelism: 1
+#         delay: 10s
+
+# networks:
+#   web:
+#     external: true
+
+# Implanta uma stack do serviço "Consul" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.consul.test.yml consul
+
+# Implanta uma stack do serviço "Consul" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.consul.production.yml consul
+
+# Lista serviços Docker em execução
+# sudo docker service ls
+
+# Lista detalhes específicos do serviço "Consul"
+# sudo docker service ps consul_consul
+
+# Exibe os logs do serviço "Consul"
+# sudo docker service logs consul_consul
+
+# Remove o serviço "Consul" do ambiente de teste
+# sudo docker stack rm consul

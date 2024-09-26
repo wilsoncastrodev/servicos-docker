@@ -1,0 +1,45 @@
+services:
+  it-tools:
+    image: corentinth/it-tools
+    environment:
+      - TZ=America/Sao_Paulo
+    networks:
+      web:
+        ipv4_address: 10.0.9.24
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=web"
+        - "traefik.http.routers.it-tools.rule=Host(`it-tools.test.wilsoncastro.dev`)"
+        - "traefik.http.routers.it-tools.entrypoints=https"
+        - "traefik.http.routers.it-tools.tls=true"
+        - "traefik.http.routers.it-tools.tls.certresolver=letsencrypt"
+        - "traefik.http.services.it-tools.loadbalancer.server.port=80"
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+networks:
+  web:
+    external: true
+
+# Implanta uma stack do serviço "It-tools" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.it-tools.test.yml it-tools
+
+# Implanta uma stack do serviço "It-tools" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.it-tools.production.yml it-tools
+
+# Lista serviços Docker em execução
+# sudo docker service ls
+
+# Lista detalhes específicos do serviço "It-tools"
+# sudo docker service ps it-tools_it-tools
+
+# Exibe os logs do serviço "It-tools"
+# sudo docker service logs it-tools_it-tools
+
+# Remove o serviço "It-tools" do ambiente de teste
+# sudo docker stack rm it-tools

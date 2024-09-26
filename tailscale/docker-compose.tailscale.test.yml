@@ -1,0 +1,45 @@
+services:
+  tailscale:
+    image: tailscale
+    environment:
+      - TZ=America/Sao_Paulo
+    networks:
+      web:
+        ipv4_address: 10.0.9.39
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=web"
+        - "traefik.http.routers.tailscale.rule=Host(`tailscale.test.wilsoncastro.dev`)"
+        - "traefik.http.routers.tailscale.entrypoints=https"
+        - "traefik.http.routers.tailscale.tls=true"
+        - "traefik.http.routers.tailscale.tls.certresolver=letsencrypt"
+        - "traefik.http.services.tailscale.loadbalancer.server.port=8080"
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+networks:
+  web:
+    external: true
+
+# Implanta uma stack do serviço "Tailscale" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.tailscale.test.yml tailscale
+
+# Implanta uma stack do serviço "Tailscale" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.tailscale.production.yml tailscale
+
+# Lista serviços Docker em execução
+# sudo docker service ls
+
+# Lista detalhes específicos do serviço "Tailscale"
+# sudo docker service ps tailscale_tailscale
+
+# Exibe os logs do serviço "Tailscale"
+# sudo docker service logs tailscale_tailscale
+
+# Remove o serviço "Tailscale" do ambiente de teste
+# sudo docker stack rm tailscale

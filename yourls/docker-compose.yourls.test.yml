@@ -1,0 +1,72 @@
+services:
+  yourls:
+    image: yourls
+    environment:
+      - TZ=America/Sao_Paulo
+      - YOURLS_DB_HOST=mysql 
+      - YOURLS_DB_USER=wilsoncastrodev
+      - YOURLS_DB_PASS=Hh0mSQtdXHWBgsxK # pwgen -N 1 -s 16
+      - YOURLS_DB_NAME=yourls
+      - YOURLS_USER=wilsoncastrodev
+      - YOURLS_PASS=aCqlMxPWOjLnNyf2 # pwgen -N 1 -s 16
+      - YOURLS_SITE=https://yourls.test.wilsoncastro.dev
+    networks:
+      web:
+        ipv4_address: 10.0.9.44
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=web"
+        - "traefik.http.routers.yourls.rule=Host(`yourls.test.wilsoncastro.dev`)"
+        - "traefik.http.routers.yourls.entrypoints=https"
+        - "traefik.http.routers.yourls.tls=true"
+        - "traefik.http.routers.yourls.tls.certresolver=letsencrypt"
+        - "traefik.http.services.yourls.loadbalancer.server.port=80"
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+  mysql:
+    image: mysql:latest
+    volumes:
+      - ./mysql-app/data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=Hh0mSQtdXHWBgsxK
+      - MYSQL_DATABASE=yourls
+      - MYSQL_PASSWORD=Hh0mSQtdXHWBgsxK
+      - MYSQL_USER=wilsoncastrodev
+    networks:
+      web:
+        ipv4_address: 10.0.9.45
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+networks:
+  web:
+    external: true
+
+# Implanta uma stack do serviço "Yourls" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.yourls.test.yml yourls
+
+# Implanta uma stack do serviço "Yourls" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.yourls.production.yml yourls
+
+# Lista serviços Docker em execução
+# sudo docker service ls
+
+# Lista detalhes específicos do serviço "Yourls"
+# sudo docker service ps yourls_yourls
+
+# Exibe os logs do serviço "Yourls"
+# sudo docker service logs yourls_yourls
+
+# Remove o serviço "Yourls" do ambiente de teste
+# sudo docker stack rm yourls

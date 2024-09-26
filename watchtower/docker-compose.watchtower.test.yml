@@ -1,0 +1,44 @@
+services:
+  watchtower:
+    image: containrrr/watchtower
+    environment:
+      - TZ=America/Sao_Paulo
+    command: --interval 300 --label-enable --cleanup
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./watchtower-app/.docker/config.json:/config.json
+    networks:
+      web:
+        ipv4_address: 10.0.9.56
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+networks:
+  web:
+    external: true
+
+# Implanta uma stack do serviço "Watchtower" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.watchtower.test.yml watchtower
+
+# Implanta uma stack do serviço "Watchtower" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.watchtower.production.yml watchtower
+
+# Lista serviços Docker em execução
+# sudo docker service ls
+
+# Lista detalhes específicos do serviço "Watchtower"
+# sudo docker service ps watchtower_watchtower
+
+# Exibe os logs do serviço "Watchtower"
+# sudo docker service logs watchtower_watchtower
+
+# Remove o serviço "Watchtower" do ambiente de teste
+# sudo docker stack rm watchtower
+
+# Codifica o usuário e senha em Base 64 para criar um token de autenticação do Watchtower
+# echo -n 'username:password' | base64

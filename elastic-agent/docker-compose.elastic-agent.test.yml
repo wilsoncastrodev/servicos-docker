@@ -1,0 +1,52 @@
+services:
+  fleet-server:
+    image: docker.elastic.co/beats/elastic-agent:8.14.3
+    volumes:
+      - ./elastic-agent-app/certs:/certs
+      - ./elastic-agent-app/elastic-agent:/usr/share/elastic-agent
+      - "/var/lib/docker/containers:/var/lib/docker/containers:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "/sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro"
+      - "/proc:/hostfs/proc:ro"
+      - "/:/hostfs:ro"
+    user: root
+    environment:
+      - FLEET_SERVER_ENABLE=true
+      - FLEET_ENROLL=1
+      - FLEET_URL=http://elastic-agent:8220
+      - FLEET_URL=http://fleet-server:8220
+      - TZ=America/Sao_Paulo
+    depends_on:
+      - kibana
+    networks:
+      web:
+        ipv4_address: 10.0.9.14
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+networks:
+  web:
+    external: true
+
+# Implanta uma stack do serviço "Elastic-agent" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.elastic.test.yml elastic
+
+# Implanta uma stack do serviço "Elastic-agent" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.elastic-agent.production.yml elastic-agent
+
+# Lista serviços Docker em execução
+# sudo docker service ls
+
+# Lista detalhes específicos do serviço "Elastic-agent"
+# sudo docker service ps elastic-agent_elastic-agent
+
+# Exibe os logs do serviço "Elastic-agent"
+# sudo docker service logs elastic-agent_elastic-agent
+
+# Remove o serviço "Elastic-agent" do ambiente de teste
+# sudo docker stack rm elastic-agent

@@ -1,0 +1,104 @@
+services:
+  mongo:
+    image: mongo:5.0
+    volumes:
+      - "./mongodb-app/data:/data/db"
+    networks:
+      web:
+        ipv4_address: 10.0.9.50
+      graylog:
+        ipv4_address: 10.0.9.100
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+  elasticsearch:
+    hostname: elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
+    environment:
+      - http.host=0.0.0.0
+      - transport.host=localhost
+      - network.host=0.0.0.0
+      - "ES_JAVA_OPTS=-Dlog4j2.formatMsgNoLookups=true -Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
+      web:
+        ipv4_address: 10.0.9.51
+      graylog:
+        ipv4_address: 10.0.9.101
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+  graylog:
+    hostname: graylog
+    image: graylog/graylog:5.0
+    environment:
+      - GRAYLOG_PASSWORD_SECRET=somepasswordpepper
+      - GRAYLOG_ROOT_PASSWORD_SHA2=8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918
+      - GRAYLOG_HTTP_EXTERNAL_URI=http://127.0.0.1:9000/
+      - GRAYLOG_ELASTICSEARCH_VERSION=7
+    entrypoint: /usr/bin/tini -- wait-for-it elasticsearch:9200 --  /docker-entrypoint.sh
+    depends_on:
+      - mongo
+      - elasticsearch
+    ports:
+      - 9000:9000
+      - 1514:1514
+      - 12201:12201
+      - 5555:5555
+    networks:
+      web:
+        ipv4_address: 10.0.9.22
+      graylog:
+        ipv4_address: 10.0.9.102
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=web"
+        - "traefik.http.routers.graylog.rule=Host(`graylog.test.wilsoncastro.dev`)"
+        - "traefik.http.routers.graylog.entrypoints=https"
+        - "traefik.http.routers.graylog.tls=true"
+        - "traefik.http.routers.graylog.tls.certresolver=letsencrypt"
+        - "traefik.http.services.graylog.loadbalancer.server.port=9000"
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+networks:
+  web:
+    external: true
+  graylog:
+    driver: overlay
+
+# Implanta uma stack do serviço "Graylog" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.graylog.test.yml graylog
+
+# Implanta uma stack do serviço "Graylog" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.graylog.production.yml graylog
+
+# Lista serviços Docker em execução
+# sudo docker service ls
+
+# Lista detalhes específicos do serviço "Graylog"
+# sudo docker service ps graylog_graylog
+
+# Exibe os logs do serviço "Graylog"
+# sudo docker service logs graylog_graylog
+
+# Remove o serviço "Graylog" do ambiente de teste
+# sudo docker stack rm graylog

@@ -1,0 +1,61 @@
+services:
+  rclone:
+    image: rclone/rclone
+    volumes:
+      - ./rclone-app/config/rclone:/config/rclone
+      - ./rclone-app/data:/data
+      - ./rclone-app/logs:/logs
+    environment:
+      - TZ=America/Sao_Paulo
+      - PHP_TZ=America/Sao_Paulo
+    command:
+      - rcd
+      - --rc-web-gui
+      - --rc-web-gui-no-open-browser
+      - --rc-addr=:5572
+      - --rc-user=wilsoncastrodev
+      - --rc-pass=2WqLAeKqrOUtHYzE # pwgen -N 1 -s 16
+      # - --rc-htpasswd /config/rclone/.htpasswd
+      - --log-file=/logs/rclone.log
+      - --log-level=DEBUG
+      - --cache-dir=/vfsCache
+    networks:
+      web:
+        ipv4_address: 10.0.9.32
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=web"
+        - "traefik.http.routers.rclone.rule=Host(`rclone.test.wilsoncastro.dev`)"
+        - "traefik.http.routers.rclone.entrypoints=https"
+        - "traefik.http.routers.rclone.tls=true"
+        - "traefik.http.routers.rclone.tls.certresolver=letsencrypt"
+        - "traefik.http.services.rclone.loadbalancer.server.port=5572"
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+networks:
+  web:
+    external: true
+
+# Implanta uma stack do serviço "RClone" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.rclone.test.yml rclone
+
+# Implanta uma stack do serviço "RClone" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.rclone.production.yml rclone
+
+# Lista serviços Docker em execução
+# sudo docker service ls
+
+# Lista detalhes específicos do serviço "RClone"
+# sudo docker service ps rclone_rclone
+
+# Exibe os logs do serviço "RClone"
+# sudo docker service logs rclone
+
+# Remove o serviço "RClone" do ambiente de teste
+# sudo docker stack rm rclone

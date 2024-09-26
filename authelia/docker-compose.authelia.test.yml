@@ -1,0 +1,51 @@
+services:
+  authelia:
+    image: authelia/authelia
+    networks:
+      web:
+        ipv4_address: 10.0.9.11
+    volumes:
+      - ./authelia-app/config:/config
+    environment:
+      - TZ=America/Sao_Paulo
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=web"
+        - "traefik.http.routers.authelia.rule=Host(`authelia.test.wilsoncastro.dev`)"
+        - "traefik.http.routers.authelia.entrypoints=https"
+        - "traefik.http.routers.authelia.tls=true"
+        - "traefik.http.routers.authelia.tls.certresolver=letsencrypt"
+        - "traefik.http.services.authelia.loadbalancer.server.port=9091"
+        - "traefik.http.middlewares.authelia.forwardauth.address=http://authelia:9091/api/verify?rd=https://authelia.test.wilsoncastro.dev/"
+        - "traefik.http.middlewares.authelia.forwardauth.trustForwardHeader=true"
+        - "traefik.http.middlewares.authelia.forwardauth.authResponseHeaders=Remote-User, Remote-Groups, Remote-Name, Remote-Email"
+        - "traefik.http.routers.traefik.middlewares=traefik-forward-auth"
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+        delay: 10s
+    
+networks:
+  web:
+    external: true
+
+# Implanta uma stack do serviço "Authelia" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.authelia.test.yml authelia
+
+# Implanta uma stack do serviço "Authelia" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.authelia.production.yml authelia
+
+# Lista serviços Docker em execução
+# sudo docker service ls
+
+# Lista detalhes específicos do serviço "Authelia"
+# sudo docker service ps authelia_authelia
+
+# Exibe os logs do serviço "Authelia"
+# sudo docker service logs authelia_authelia
+
+# Remove o serviço "Authelia" do ambiente de teste
+# sudo docker stack rm authelia

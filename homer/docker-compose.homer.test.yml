@@ -1,0 +1,47 @@
+services:
+  homer:
+    image: b4bz/homer:latest
+    volumes:
+      - ./homer-app/assets/:/www/assets
+    environment:
+      - TZ=America/Sao_Paulo
+    networks:
+      web:
+        ipv4_address: 10.0.9.23
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=web"
+        - "traefik.http.routers.homer.rule=Host(`servicos.wilsoncastro.dev`)"
+        - "traefik.http.routers.homer.entrypoints=https"
+        - "traefik.http.routers.homer.tls=true"
+        - "traefik.http.routers.homer.tls.certresolver=letsencrypt"
+        - "traefik.http.services.homer.loadbalancer.server.port=8080"
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+networks:
+  web:
+    external: true
+
+# Implanta uma stack do serviço "Homer" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.homer.test.yml homer
+
+# Implanta uma stack do serviço "Homer" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.homer.production.yml homer
+
+# Lista serviços Docker em execução
+# sudo docker service ls
+
+# Lista detalhes específicos do serviço "Homer"
+# sudo docker service ps homer_homer
+
+# Exibe os logs do serviço "Homer"
+# sudo docker service logs homer_homer
+
+# Remove o serviço "Homer" do ambiente de teste
+# sudo docker stack rm homer

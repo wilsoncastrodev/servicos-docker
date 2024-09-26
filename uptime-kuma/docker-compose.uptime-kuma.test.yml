@@ -1,0 +1,47 @@
+services:
+  uptime-kuma:
+    image: louislam/uptime-kuma
+    environment:
+      - TZ=America/Sao_Paulo
+    volumes:
+      - ./uptime-kuma-app/data:/app/data
+    networks:
+      web:
+        ipv4_address: 10.0.9.41
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=web"
+        - "traefik.http.routers.uptime-kuma.rule=Host(`uptime-kuma.test.wilsoncastro.dev`)"
+        - "traefik.http.routers.uptime-kuma.entrypoints=https"
+        - "traefik.http.routers.uptime-kuma.tls=true"
+        - "traefik.http.routers.uptime-kuma.tls.certresolver=letsencrypt"
+        - "traefik.http.services.uptime-kuma.loadbalancer.server.port=3001"
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+networks:
+  web:
+    external: true
+
+# Implanta uma stack do serviço "Uptime-kuma" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.uptime-kuma.test.yml uptime-kuma
+
+# Implanta uma stack do serviço "Uptime-kuma" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.uptime-kuma.production.yml uptime-kuma
+
+# Lista serviços Docker em execução
+# sudo docker service ls
+
+# Lista detalhes específicos do serviço "Uptime-kuma"
+# sudo docker service ps uptime-kuma_uptime-kuma
+
+# Exibe os logs do serviço "Uptime-kuma"
+# sudo docker service logs uptime-kuma_uptime-kuma
+
+# Remove o serviço "Uptime" do ambiente de teste
+# sudo docker stack rm uptime

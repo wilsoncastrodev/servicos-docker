@@ -1,0 +1,54 @@
+services:
+  gitea:
+    image: gitea/gitea:latest
+    environment:
+      - TZ=America/Sao_Paulo
+      - ROOT_URL=https://gitea.test.wilsoncastro.dev
+      - SSH_DOMAIN=git.test.wilsoncastro.dev
+      - APP_NAME=Gitea
+      - SSH_PORT=22
+      - HTTP_PORT=3000
+    volumes:
+      - ./gitea-app/data:/data
+    networks:
+      web:
+        ipv4_address: 10.0.9.17
+    ports:
+      - "222:22"  # Desbloquar a porta do firewall
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=web"
+        - "traefik.http.routers.gitea.rule=Host(`gitea.test.wilsoncastro.dev`)"
+        - "traefik.http.routers.gitea.entrypoints=https"
+        - "traefik.http.routers.gitea.tls=true"
+        - "traefik.http.routers.gitea.tls.certresolver=letsencrypt"
+        - "traefik.http.services.gitea.loadbalancer.server.port=3000"
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+networks:
+  web:
+    external: true
+
+# Implanta uma stack do serviço "Gitea" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.gitea.test.yml gitea
+
+# Implanta uma stack do serviço "Gitea" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.gitea.production.yml gitea
+
+# Lista serviços Docker em execução
+# sudo docker service ls
+
+# Lista detalhes específicos do serviço "Gitea"
+# sudo docker service ps gitea_gitea
+
+# Exibe os logs do serviço "Gitea"
+# sudo docker service logs gitea_gitea
+
+# Remove o serviço "Gitea" do ambiente de teste
+# sudo docker stack rm gitea

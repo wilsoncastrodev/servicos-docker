@@ -1,0 +1,67 @@
+---
+# Define o nome do servidor Kibana
+server.name: kibana
+
+# Define o endereço IP para escuta do servidor Kibana (0.0.0.0 significa escuta em todos os endereços IP)
+server.host: 0.0.0.0
+
+# Define a URL base pública do servidor Kibana
+server.publicBaseUrl: 'https://kibana.test.wilsoncastro.dev'
+
+# Define o(s) endereço(s) do Elasticsearch que o Kibana deve usar
+#elasticsearch.hosts: ['http://elasticsearch:9200']
+
+# Habilita a interface de monitoramento para contêineres do Elasticsearch
+# monitoring.ui.container.elasticsearch.enabled: true
+
+# Define o nome de usuário para autenticação no Elasticsearch
+#elasticsearch.username: admin
+
+# Define a senha para autenticação no Elasticsearch
+#elasticsearch.password: admin
+
+# Habilita o recurso xpack.fleet
+# xpack.fleet.enabled: false
+
+# Define os endereços do servidor Fleet para os agentes se conectarem
+# xpack.fleet.agents.fleet_server.hosts: ['http://fleet-server:8220']
+
+# Define os endereços do Elasticsearch que os agentes devem usar
+# xpack.fleet.agents.elasticsearch.hosts: ['http://elasticsearch:9200']
+
+# Define a chave de criptografia para objetos salvos criptografados
+# xpack.encryptedSavedObjects.encryptionKey: '12345678901234567890123456789012'
+
+# Define a chave de criptografia para segurança
+# xpack.security.encryptionKey: '12345678901234567890123456789012'
+
+# Desabilita a verificação TLS para os agentes
+# xpack.fleet.agents.tlsCheckDisabled: true
+
+# Define os pacotes que devem ser instalados pelo xpack.fleet
+# xpack.fleet.packages:
+#   - name: fleet_server
+#     version: latest
+#   - name: system
+#     version: latest
+#   - name: elastic_agent
+#     version: latest
+
+# Define as políticas de agente do xpack.fleet
+# xpack.fleet.agentPolicies:
+#   - name: Fleet Server policy
+#     id: fleet-server-policy
+#     description: Fleet Server policy
+#     monitoring_enabled:
+#       - logs
+#       - metrics
+#     package_policies:
+#       - name: fleet_server-1
+#         package:
+#           name: fleet_server
+#       - name: system-1
+#         package:
+#           name: system
+#       - name: elastic_agent-1
+#         package:
+#           name: elastic_agent

@@ -1,0 +1,52 @@
+services:
+  glances:
+    image: nicolargo/glances
+    volumes:
+      - ./glances-app/conf/glances.conf:/glances/conf/glances.conf
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - TZ=America/Sao_Paulo
+      - GLANCES_OPT=-w
+    networks:
+      web:
+        ipv4_address: 10.0.9.18
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=web"
+        - "traefik.http.routers.glances.rule=Host(`glances.test.wilsoncastro.dev`)"
+        - "traefik.http.routers.glances.entrypoints=https"
+        - "traefik.http.routers.glances.tls=true"
+        - "traefik.http.routers.glances.tls.certresolver=letsencrypt"
+        - "traefik.http.services.glances.loadbalancer.server.port=61208"
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+networks:
+  web:
+    external: true
+
+# Implanta uma stack do serviço "Glances" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.glances.test.yml glances
+
+# Implanta uma stack do serviço "Glances" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.glances.production.yml glances
+
+# Lista serviços Docker em execução
+# sudo docker service ls
+
+# Lista detalhes específicos do serviço "Glances"
+# sudo docker service ps glances_glances
+
+# Exibe os logs do serviço "Glances"
+# sudo docker service logs glances_glances
+
+# Remove o serviço "Glances" do ambiente de teste
+# sudo docker stack rm glances_glances
+
+# Remove o serviço "Glances" do ambiente de teste
+# sudo docker stack rm glances

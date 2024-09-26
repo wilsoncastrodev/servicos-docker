@@ -1,0 +1,88 @@
+services:
+  agent:
+    image: swarmpit/agent:latest
+    networks:
+      - swarmpit
+    environment:
+      - EVENT_ENDPOINT=http://swarmpit:8080/events
+      - HEALTH_CHECK_ENDPOINT=http://swarmpit:8080/version
+      - DOCKER_API_VERSION=1.39
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    deploy:
+      mode: global
+
+  swarmpit:
+    image: swarmpit/swarmpit:latest
+    networks:
+      web:
+        ipv4_address: 10.0.9.35
+    environment:
+      - SWARMPIT_DB=http://couchdb:5984
+      - SWARMPIT_INFLUXDB=http://influxdb:8086
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=web"
+        - "traefik.http.routers.swarmpit.rule=Host(`swarmpit.test.wilsoncastro.dev`)"
+        - "traefik.http.routers.swarmpit.entrypoints=https"
+        - "traefik.http.routers.swarmpit.tls=true"
+        - "traefik.http.routers.swarmpit.tls.certresolver=letsencrypt"
+        - "traefik.http.services.swarmpit.loadbalancer.server.port=8080"
+      replicas: 1
+
+  couchdb:
+    image: couchdb:2.3.0
+    networks:
+      web:
+        ipv4_address: 10.0.9.36
+    volumes:
+      - ./swarmpit-app/couchdb/data:/opt/couchdb/data
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+  influxdb:
+    image: influxdb:1.8.0
+    networks:
+      web:
+        ipv4_address: 10.0.9.37
+    volumes:
+      - ./swarmpit-app/influxdb/data:/var/lib/influxdb
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+networks:
+  web:
+    external: true
+  swarmpit:
+    external: true
+
+# Implanta uma stack do serviço "Swarmpit" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.swarmpit.test.yml swarmpit
+
+# Implanta uma stack do serviço "Swarmpit" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.swarmpit.production.yml swarmpit
+
+# Lista serviços Docker em execução
+# sudo docker service ls
+
+# Lista detalhes específicos do serviço "Swarmpit"
+# sudo docker service ps swarmpit_swarmpit
+
+# Exibe os logs do serviço "Swarmpit"
+# sudo docker service logs swarmpit_swarmpit
+
+# Remove o serviço "Swarmpit" do ambiente de teste
+# sudo docker stack rm swarmpit

@@ -1,0 +1,48 @@
+services:
+  syslog:
+    image: balabit/syslog-ng
+    environment:
+      - TZ=America/Sao_Paulo
+    volumes:
+     - ./syslog-app/syslog-ng/syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf 
+     - ./syslog-app/log:/var/log
+    networks:
+      web:
+        ipv4_address: 10.0.9.38
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=web"
+        - "traefik.http.routers.syslog.rule=Host(`syslog.test.wilsoncastro.dev`)"
+        - "traefik.http.routers.syslog.entrypoints=https"
+        - "traefik.http.routers.syslog.tls=true"
+        - "traefik.http.routers.syslog.tls.certresolver=letsencrypt"
+        - "traefik.http.services.syslog.loadbalancer.server.port=8080"
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+networks:
+  web:
+    external: true
+
+# Implanta uma stack do serviço "Syslog" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.syslog.test.yml syslog
+
+# Implanta uma stack do serviço "Syslog" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.syslog.production.yml syslog
+
+# Lista serviços Docker em execução
+# sudo docker service ls
+
+# Lista detalhes específicos do serviço "Syslog"
+# sudo docker service ps syslog_syslog
+
+# Exibe os logs do serviço "Syslog"
+# sudo docker service logs syslog_syslog
+
+# Remove o serviço "Syslog" do ambiente de teste
+# sudo docker stack rm syslog

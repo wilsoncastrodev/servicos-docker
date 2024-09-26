@@ -1,0 +1,80 @@
+services:
+  traefik:
+    image: "traefik:v3.0"
+    command:
+      - --providers.docker.exposedByDefault=false 
+      - --providers.docker=true  
+      - --providers.docker.watch=true
+      - --providers.swarm.endpoint=unix:///var/run/docker.sock
+      - --entrypoints.http.address=:80 
+      - --entrypoints.http.http.redirections.entrypoint.to=https
+      - --entrypoints.http.http.redirections.entrypoint.scheme=https 
+      - --entrypoints.http.http.redirections.entrypoint.permanent=true 
+      - --entrypoints.https.address=:443 
+      - --certificatesresolvers.letsencrypt.acme.email=contato@wilsoncastro.dev 
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
+      - --certificatesresolvers.letsencrypt.acme.httpChallenge.entryPoint=http
+      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
+      - --ping 
+      - --api=true 
+      - --api.insecure=false 
+      - --api.dashboard=true 
+      - --global.checknewversion=false 
+      - --global.sendanonymoususage=false 
+      - --providers.docker.network=web
+      - --log.level=DEBUG
+      - --log.format=json 
+      - --log.filePath=/var/log/traefik/traefik.log
+      - --accesslog=true
+      - --accesslog.format=json 
+      - --accesslog.filepath=/var/log/traefik/access.log
+    ports:
+      - 80:80
+      - 443:443/tcp
+      - 8080:8080
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./traefik-app/letsencrypt:/letsencrypt"
+      - "./traefik-app/logs:/var/log/traefik"
+    networks:
+      web:
+        ipv4_address: 10.0.9.5
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=web"
+        - "traefik.http.routers.traefik.rule=Host(`traefik.test.wilsoncastro.dev`)"
+        - "traefik.http.routers.traefik.entrypoints=https"
+        - "traefik.http.routers.traefik.service=api@internal"
+        - "traefik.http.routers.traefik.tls=true"
+        - "traefik.http.routers.traefik.tls.certresolver=letsencrypt"
+        - "traefik.http.services.traefik.loadbalancer.server.port=8080"
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+    
+networks:
+  web:
+    external: true
+
+# Implanta uma stack do serviço "Traefik" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.traefik.test.yml traefik
+
+# Implanta uma stack do serviço "Traefik" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.traefik.production.yml traefik
+
+# Lista serviços Docker em execução
+# sudo docker service ls
+
+# Lista detalhes específicos do serviço "Traefik"
+# sudo docker service ps traefik_traefik
+
+# Exibe os logs do serviço "Traefik"
+# sudo docker service logs traefik_traefik
+
+# Remove o serviço "Traefik" do ambiente de teste
+# sudo docker stack rm traefik

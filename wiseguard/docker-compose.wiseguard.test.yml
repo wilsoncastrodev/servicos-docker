@@ -1,0 +1,53 @@
+services:
+  wireguard:
+    image: linuxserver/wireguard
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Sao_Paulo
+      - SERVERURL=3.89.165.134
+      - SERVERPORT=51820
+      - PEERS=wcastro
+      - PEERDNS=auto
+    volumes:
+      - ./wireguard-app/config:/config
+      - ./wireguard-app/lib/modules:/lib/modules
+    ports:
+      - 51820:51820/udp
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+    networks:
+      web:
+        ipv4_address: 10.0.9.43
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+networks:
+  web:
+    external: true
+
+# Implanta uma stack do serviço "Wiseguard" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.wiseguard.test.yml wiseguard
+
+# Implanta uma stack do serviço "Wiseguard" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.wiseguard.production.yml wiseguard
+
+# Lista serviços Docker em execução
+# sudo docker service ls
+
+# Lista detalhes específicos do serviço "Wiseguard"
+# sudo docker service ps wiseguard_wiseguard
+
+# Exibe os logs do serviço "Wiseguard"
+# sudo docker service logs wiseguard_wiseguard
+
+# Remove o serviço "Wiseguard" do ambiente de teste
+# sudo docker stack rm wiseguard

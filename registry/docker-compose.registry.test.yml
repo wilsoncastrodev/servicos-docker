@@ -1,0 +1,81 @@
+services:
+  registry:
+    image: registry:2.8.1
+    environment:
+      - REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY=/data
+      - REGISTRY_STORAGE_DELETE_ENABLED=true
+      - REGISTRY_AUTH=htpasswd
+      - REGISTRY_AUTH_HTPASSWD_REALM=registry.wilsoncastro.dev
+      - REGISTRY_AUTH_HTPASSWD_PATH=/auth/registry.password
+    volumes:
+      - ./registry-app/data:/data
+      - ./registry-app/auth/registry.password:/auth/registry.password
+    networks:
+      web:
+        ipv4_address: 10.0.9.33
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=web"
+        - "traefik.http.routers.registry.rule=Host(`registry.wilsoncastro.dev`)"
+        - "traefik.http.routers.registry.entrypoints=https"
+        - "traefik.http.routers.registry.tls=true"
+        - "traefik.http.routers.registry.tls.certresolver=letsencrypt"
+        - "traefik.http.services.registry.loadbalancer.server.port=5000"
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+        delay: 10s
+  
+  registry-ui:
+    image: joxit/docker-registry-ui:2.5.7
+    environment:
+      - DELETE_IMAGES=true
+      - REGISTRY_TITLE=My Docker Registry
+      - NGINX_PROXY_PASS_URL=http://registry:5000
+      - SINGLE_REGISTRY=true
+    networks:
+      web:
+        ipv4_address: 10.0.9.34
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=web"
+        - "traefik.http.routers.registry-admin.rule=Host(`registry-admin.wilsoncastro.dev`)"
+        - "traefik.http.routers.registry-admin.entrypoints=https"
+        - "traefik.http.routers.registry-admin.tls=true"
+        - "traefik.http.routers.registry-admin.tls.certresolver=letsencrypt"
+        - "traefik.http.services.registry-admin.loadbalancer.server.port=80"
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+networks:
+  web:
+    external: true
+
+# Implanta uma stack do serviço "Registry" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.registry.test.yml registry
+
+# Implanta uma stack do serviço "Registry" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.registry.production.yml registry
+
+# Lista serviços Docker em execução
+# sudo docker service ls
+
+# Lista detalhes específicos do serviço "Registry"
+# sudo docker service ps registry_registry
+
+# Exibe os logs do serviço "Registry"
+# sudo docker service logs registry_registry
+
+# Logar no registry.wilsoncastro.dev
+# sudo docker login registry.wilsoncastro.dev
+
+# Remove o serviço "Registry" do ambiente de teste
+# sudo docker stack rm registry

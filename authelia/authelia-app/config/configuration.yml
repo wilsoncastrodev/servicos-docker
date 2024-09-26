@@ -1,0 +1,38 @@
+identity_validation:
+    reset_password:
+        jwt_secret: 0dc99becb298a72aa052e993db0f2825c2c2c43fd77b35115d4d094e802ff6e3
+
+server:
+  address: tcp://0.0.0.0:9091/
+  
+totp:
+  issuer: authelia.com
+
+access_control:
+  default_policy: one_factor
+
+authentication_backend:
+  file:
+    path: /config/users.yml
+
+session:
+  name: authelia_session
+  expiration: 1h
+  inactivity: 5m
+  cookies:
+    - domain: 'wilsoncastro.dev'
+      authelia_url: 'https://authelia.wilsoncastro.dev'
+
+regulation:
+  max_retries: 3
+  find_time: 2m
+  ban_time: 5m
+
+storage:
+  encryption_key: AB9DEK/iIvOGAH6LHNkn4MJCQHfgpJNUIPFDr4dJuS4=
+  local:
+    path: /config/db.sqlite3
+
+notifier:
+  filesystem:
+    filename: '/config/notification.txt'

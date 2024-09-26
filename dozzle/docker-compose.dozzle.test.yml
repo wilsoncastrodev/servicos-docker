@@ -1,0 +1,47 @@
+services:
+  dozzle:
+    image: amir20/dozzle
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - TZ=America/Sao_Paulo
+    networks:
+      web:
+        ipv4_address: 10.0.9.12
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=web"
+        - "traefik.http.routers.dozzle.rule=Host(`dozzle.test.wilsoncastro.dev`)"
+        - "traefik.http.routers.dozzle.entrypoints=https"
+        - "traefik.http.routers.dozzle.tls=true"
+        - "traefik.http.routers.dozzle.tls.certresolver=letsencrypt"
+        - "traefik.http.services.dozzle.loadbalancer.server.port=8080"
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+networks:
+  web:
+    external: true
+
+# Implanta uma stack do serviço "Dozzle" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.dozzle.test.yml dozzle
+
+# Implanta uma stack do serviço "Dozzle" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.dozzle.production.yml dozzle
+
+# Lista serviços Docker em execução
+# sudo docker service ls
+
+# Lista detalhes específicos do serviço "Dozzle"
+# sudo docker service ps dozzle_dozzle
+
+# Exibe os logs do serviço "Dozzle"
+# sudo docker service logs dozzle_dozzle
+
+# Remove o serviço "Dozzle" do ambiente de teste
+# sudo docker stack rm dozzle

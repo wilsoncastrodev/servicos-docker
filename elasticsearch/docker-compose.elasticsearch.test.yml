@@ -1,0 +1,72 @@
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.14.3
+    environment:
+      - TZ=America/Sao_Paulo
+      - http.host=0.0.0.0
+      - transport.host=127.0.0.1
+      - network.host=0.0.0.0
+      - "ES_JAVA_OPTS=-Xms512M -Xmx512M"
+      - xpack.ml.enabled=false
+      - xpack.security.enabled=false
+      - "discovery.type=single-node"
+      - ELASTIC_PASSWORD=admin
+    volumes:
+      - ./elasticsearch-app/data:/usr/share/elasticsearch-app/data:rw
+      - ./elasticsearch-app/logs:/usr/share/elasticsearch-app/logs:rw
+      - ./elasticsearch-app/backup:/usr/share/elasticsearch-app/backup:rw
+      - ./elasticsearch-app/certs:/usr/share/elasticsearch/config/certs
+      # - ./elasticsearch-app/conf/elasticsearch-app.yml:/usr/share/elasticsearch-app/config/elasticsearch-app.yml
+      # - ./elasticsearch-app/plugins:/usr/share/elasticsearch-app/plugins:rw
+    ulimits:
+      nproc: 65535
+      memlock:
+        soft: -1
+        hard: -1
+    cap_add:
+      - ALL
+    networks:
+      web:
+        ipv4_address: 10.0.9.15
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=web"
+        - "traefik.http.routers.elasticsearch.rule=Host(`elasticsearch.test.wilsoncastro.dev`)"
+        - "traefik.http.routers.elasticsearch.entrypoints=https"
+        - "traefik.http.routers.elasticsearch.tls=true"
+        - "traefik.http.routers.elasticsearch.tls.certresolver=letsencrypt"
+        - "traefik.http.services.elasticsearch.loadbalancer.server.port=9200"
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+networks:
+  web:
+    external: true
+
+# Implanta uma stack do serviço "Elasticsearch" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.elasticsearch.test.yml elasticsearch
+
+# Implanta uma stack do serviço "Elasticsearch" no ambiente de teste
+# sudo docker stack deploy -c docker-compose.elasticsearch.production.yml elasticsearch
+
+# Lista serviços Docker em execução
+# sudo docker service ls
+
+# Lista detalhes específicos do serviço "Elasticsearch"
+# sudo docker service ps elasticsearch_elasticsearch
+
+# Exibe os logs do serviço "Elasticsearch"
+# sudo docker service logs elasticsearch_elasticsearch
+
+# Remove o serviço "Elasticsearch" do ambiente de teste
+# sudo docker stack rm elasticsearch
+
+# Obter o token de serviço do Elasticsearch
+# sudo docker ps
+# sudo docker exec -it elasticsearch /bin/bash
+# bin/elasticsearch-service-tokens create elastic/kibana kibana-token
